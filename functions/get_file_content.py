@@ -1,4 +1,6 @@
 import os
+from google.genai import types 
+
 
 def get_file_content(working_directory, file_path):
     abs_path = os.path.join(working_directory, file_path)
@@ -16,4 +18,17 @@ def get_file_content(working_directory, file_path):
 
     return file_content_string
 
-print(get_file_content("calculator", "pkg/calculator.py"))
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Read the contents of a given file",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="The file to read the content of",
+            ),
+        },
+    ),
+)
+
