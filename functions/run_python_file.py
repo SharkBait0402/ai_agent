@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from google.genai import types 
 
 def run_python_file(working_directory, file_path, args=[]):
@@ -13,16 +14,23 @@ def run_python_file(working_directory, file_path, args=[]):
     elif not file_path.endswith(".py"):
         return f'Error: "{file_path}" is not a Python file.'
 
-    new_args = ["python", abs_path]
+    new_args = [sys.executable, abs_path, *args]
     for arg in args:
         new_args.append(arg)
     
     obj = subprocess.run(new_args, timeout=30, capture_output=True )
 
+    stdout = (obj.stdout or b"").decode()
+    stderr = (obj.stderr or b"").decode()
     
     if obj.returncode != 0:
         return f"Process exited with code {obj.returncode}"
-    elif obj.stdout == b'':
+ 
+    if stdout.strip() == "" and stderr.strip() != "":
+        # some runners print to stderr
+        return f"STDERR: {stderr}"
+    
+    if stdout.strip() == "":
         return "no output produced"
 
     return f"STDOUT: {obj.stdout}\n\n STDERR: {obj.stderr}"
@@ -33,7 +41,7 @@ schema_run_python_file = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            "directory": types.Schema(
+            "file_path": types.Schema(
                 type=types.Type.STRING,
                 description="File to run in python",
             ),

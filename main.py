@@ -3,10 +3,11 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types 
-from functions.get_files_info import schema_get_files_info
-from functions.get_file_content import schema_get_file_content
-from functions.write_file import schema_write_file
-from functions.run_python_file import schema_run_python_file
+from functions.get_files_info import schema_get_files_info, get_files_info
+from functions.get_file_content import schema_get_file_content, get_file_content
+from functions.write_file import schema_write_file, write_file
+from functions.run_python_file import schema_run_python_file, run_python_file
+from functions.call_function import call_function
 
 load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
@@ -20,6 +21,11 @@ if len(sys.argv) < 2:
 
 
 prompt = sys.argv[1]
+verbose = False
+
+if len(sys.argv) == 3 and sys.argv[2] == "--verbose":
+    verbose = True
+
 
 available_functions = types.Tool(
     function_declarations=[
@@ -56,19 +62,8 @@ def main():
 
     if response.function_calls:
         for fc in response.function_calls:
-            print(f"Calling function: {fc.name}({fc.args})")
-            if fc.name == "schema_get_files_info":
-                result = get_files_info(**fc.args)
-                print(result)
-            elif fc.name == "schema_get_file_content":
-                result = get_file_content(**fc.args)
-                print(result)  # ensure get_files_info returns a value
-            elif fc.name == "schema_write_file":
-                result = write_file(**fc.args)
-                print(result)  # ensure get_files_info returns a value
-            elif fc.name == "schema_run_python_file":
-                result = run_python_file(**fc.args)
-                print(result)  # ensure get_files_info returns a value
+            function_call_result = call_function(fc, verbose=verbose)
+            print(f"-> {function_call_result.parts[0].function_response.response["result"]}")
 
 
     else:

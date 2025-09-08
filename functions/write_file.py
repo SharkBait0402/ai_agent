@@ -21,7 +21,7 @@ schema_write_file = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            "directory": types.Schema(
+            "file_path": types.Schema(
                 type=types.Type.STRING,
                 description="File to overwrite the contents of, if not file is there, create a new one",
             ),
