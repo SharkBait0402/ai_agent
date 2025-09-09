@@ -11,7 +11,7 @@ def write_file(working_directory, file_path, content):
     elif not os.path.isfile(file_path):
         os.mknod(file_path)
 
-    with open(file_path, "w") as f:
+    with open(abs_path, "w") as f:
         f.write(content)
         return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
 

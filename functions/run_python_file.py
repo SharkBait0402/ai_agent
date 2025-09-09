@@ -4,9 +4,11 @@ import sys
 from google.genai import types 
 
 def run_python_file(working_directory, file_path, args=[]):
+
     abs_path = os.path.join(working_directory, file_path)
     dir_path = os.path.abspath(abs_path)
     work_path = os.path.abspath(working_directory)
+
     if not dir_path.startswith(work_path):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'    
     elif not os.path.isfile(abs_path):
@@ -14,24 +16,27 @@ def run_python_file(working_directory, file_path, args=[]):
     elif not file_path.endswith(".py"):
         return f'Error: "{file_path}" is not a Python file.'
 
-    new_args = [sys.executable, abs_path, *args]
-    for arg in args:
-        new_args.append(arg)
-    
-    obj = subprocess.run(new_args, timeout=30, capture_output=True )
+    try:
+        new_args = ["python", abs_path]
+        if args:
+            new_args.extend(args)
+        
+        obj = subprocess.run(new_args, timeout=30, capture_output=True )
 
-    stdout = (obj.stdout or b"").decode()
-    stderr = (obj.stderr or b"").decode()
+        stdout = (obj.stdout or b"").decode()
+        stderr = (obj.stderr or b"").decode()
+        
+        if obj.returncode != 0:
+            return f"Process exited with code {obj.returncode}"
     
-    if obj.returncode != 0:
-        return f"Process exited with code {obj.returncode}"
- 
-    if stdout.strip() == "" and stderr.strip() != "":
-        # some runners print to stderr
-        return f"STDERR: {stderr}"
-    
-    if stdout.strip() == "":
-        return "no output produced"
+        if stdout.strip() == "" and stderr.strip() != "":
+            # some runners print to stderr
+            return f"STDERR: {stderr}"
+        
+        if stdout.strip() == "":
+            return "no output produced"
+    except Exception as e :
+        return "error running python file"
 
     return f"STDOUT: {obj.stdout}\n\n STDERR: {obj.stderr}"
 
@@ -45,6 +50,11 @@ schema_run_python_file = types.FunctionDeclaration(
                 type=types.Type.STRING,
                 description="File to run in python",
             ),
+            "args": types.Schema(
+                type=types.Type.STRING,
+                description="optional args to run with file"
+            )
         },
+        required=["file_path"]
     ),
 )

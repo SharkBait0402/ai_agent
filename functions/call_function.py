@@ -13,12 +13,16 @@ functions = {
 }
 
 def call_function(function_call_part, verbose=False):
-    if verbose==True:
-        print(f"Calling function: {function_call_part.name}({function_call_part.args})")
-    else:
-        print(f" - Calling function: {function_call_part.name}")
 
     function_name = function_call_part.name
+    kwargs = dict(function_call_part.args or {})
+    kwargs["working_directory"] = "calculator"
+
+    if verbose==True:
+        print(f"Calling function: {function_name}({kwargs})")
+    else:
+        print(f" - Calling function: {function_name}")
+
     func = functions.get(function_name)
     if func == None:
         return types.Content(
@@ -31,10 +35,8 @@ def call_function(function_call_part, verbose=False):
                 ],
             )
 
-    kwargs = dict(function_call_part.args or {})
-    kwargs["working_directory"] = "./calculator"
-    function_result = func(**kwargs)
-        
+            
+    result = func(**kwargs)
     return types.Content(
         role="tool",
         parts=[
