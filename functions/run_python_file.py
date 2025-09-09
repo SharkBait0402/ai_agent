@@ -37,7 +37,6 @@ def run_python_file(working_directory, file_path, args=[]):
 
     return f"STDOUT: {obj.stdout}\n\n STDERR: {obj.stderr}"
 
-print(run_python_file("calculator", "../main.py"))
 
 schema_run_python_file = types.FunctionDeclaration(
     name="run_python_file",

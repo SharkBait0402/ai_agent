@@ -16,7 +16,7 @@ def call_function(function_call_part, verbose=False):
 
     function_name = function_call_part.name
     kwargs = dict(function_call_part.args or {})
-    kwargs["working_directory"] = "calculator"
+    kwargs["working_directory"] = "./calculator"
 
     if verbose==True:
         print(f"Calling function: {function_name}({kwargs})")
@@ -36,7 +36,7 @@ def call_function(function_call_part, verbose=False):
             )
 
             
-    result = func(**kwargs)
+    function_result = func(**kwargs)
     return types.Content(
         role="tool",
         parts=[

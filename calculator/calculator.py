@@ -1,5 +1,3 @@
-# calculator.py
-
 class Calculator:
     def __init__(self):
         self.operators = {
@@ -18,8 +16,30 @@ class Calculator:
     def evaluate(self, expression):
         if not expression or expression.isspace():
             return None
-        tokens = expression.strip().split()
+
+        tokens = self._tokenize(expression)
         return self._evaluate_infix(tokens)
+
+    def _tokenize(self, expression):
+        tokens = []
+        current_number = ""
+        for char in expression:
+            if char.isdigit() or char == '.':
+                current_number += char
+            elif char in self.operators:
+                if current_number:
+                    tokens.append(current_number)
+                    current_number = ""
+                tokens.append(char)
+            elif char.isspace():
+                if current_number:
+                    tokens.append(current_number)
+                    current_number = ""
+            else:
+                raise ValueError(f"Invalid character: {char}")
+        if current_number:
+            tokens.append(current_number)
+        return tokens
 
     def _evaluate_infix(self, tokens):
         values = []
@@ -59,3 +79,10 @@ class Calculator:
         b = values.pop()
         a = values.pop()
         values.append(self.operators[operator](a, b))
+
+
+# Test case
+calculator = Calculator()
+expression = "3 + 7 * 2"
+result = calculator.evaluate(expression)
+print(f"{expression} = {result}")
